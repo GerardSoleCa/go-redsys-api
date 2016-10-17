@@ -6,6 +6,9 @@ import (
 	"crypto/des"
 	"crypto/cipher"
 	"bytes"
+	"crypto/hmac"
+	"strings"
+	"crypto/sha256"
 )
 
 var IV = []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
@@ -37,6 +40,14 @@ func (r *Redsys) decrypt3DES(str string, key string) string {
 	unpaddedResult, _ := zeroUnpad(encrypted, block.BlockSize())
 
 	return string(unpaddedResult)
+}
+
+func (r *Redsys) mac256(data string, key string) string {
+	decodedKey, _ := base64.StdEncoding.DecodeString(key)
+	hmac := hmac.New(sha256.New, []byte(decodedKey))
+	hmac.Write([]byte(strings.TrimSpace(data)))
+	result := hmac.Sum(nil)
+	return base64.StdEncoding.EncodeToString(result)
 }
 
 func getCipher(key string) cipher.Block {
