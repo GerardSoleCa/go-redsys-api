@@ -9,12 +9,30 @@ import (
 	"crypto/hmac"
 	"strings"
 	"crypto/sha256"
+	"encoding/json"
 )
 
 var IV = []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 
 type Redsys struct {
 
+}
+
+type MerchantParameters struct {
+	Ds_Date              string `json:"Ds_Date"`
+	Ds_Hour              string `json:"Ds_Hour"`
+	Ds_SecurePayment     string `json:"Ds_SecurePayment"`
+	Ds_Card_Country      string `json:"Ds_Card_Country"`
+	Ds_Amount            string `json:"Ds_Amount"`
+	Ds_Currency          string `json:"Ds_Currency"`
+	Ds_Order             string `json:"Ds_Order"`
+	Ds_MerchantCode      string `json:"Ds_MerchantCode"`
+	Ds_Terminal          string `json:"Ds_Terminal"`
+	Ds_Response          string `json:"Ds_Response"`
+	Ds_MerchantData      string `json:"Ds_MerchantData"`
+	Ds_TransactionType   string `json:"Ds_TransactionType"`
+	Ds_ConsumerLanguage  string `json:"Ds_ConsumerLanguage"`
+	Ds_AuthorisationCode string `json:"Ds_AuthorisationCode"`
 }
 
 func (r *Redsys) encrypt3DES(str string, key string) string {
@@ -48,6 +66,11 @@ func (r *Redsys) mac256(data string, key string) string {
 	hmac.Write([]byte(strings.TrimSpace(data)))
 	result := hmac.Sum(nil)
 	return base64.StdEncoding.EncodeToString(result)
+}
+
+func (r *Redsys) createMerchantParameters(data *MerchantParameters) string {
+	merchantMarshalledParams, _ := json.Marshal(data)
+	return base64.StdEncoding.EncodeToString(merchantMarshalledParams)
 }
 
 func getCipher(key string) cipher.Block {
