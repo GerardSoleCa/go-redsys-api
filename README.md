@@ -1,6 +1,6 @@
 # go-redsys-api
 
-[![Code Climate](https://codeclimate.com/github/GerardSoleCa/go-redsys-api/badges/gpa.svg)](https://codeclimate.com/github/GerardSoleCa/go-redsys-api)
+[![Build Status](https://travis-ci.org/GerardSoleCa/go-redsys-api.svg?branch=master)](https://travis-ci.org/GerardSoleCa/go-redsys-api) [![Code Climate](https://codeclimate.com/github/GerardSoleCa/go-redsys-api/badges/gpa.svg)](https://codeclimate.com/github/GerardSoleCa/go-redsys-api)
 
 Redsys api implementation with new the key-hashed message autentication code (HMAC) SHA256 for the virtual payment gateway integration.
 
