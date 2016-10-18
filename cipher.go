@@ -1,11 +1,11 @@
 package redsys
 
 import (
+	"bytes"
 	"crypto/cipher"
+	"crypto/des"
 	"encoding/base64"
 	"log"
-	"crypto/des"
-	"bytes"
 )
 
 func getCipher(key string) cipher.Block {
@@ -32,12 +32,12 @@ func zeroPad(data []byte, blocklen int) ([]byte, error) {
 
 // zeroUnpad function to remove trailing zeros
 func zeroUnpad(data []byte, blocklen int) ([]byte, error) {
-	lastIndex := len(data);
-	for (lastIndex >= 0 && lastIndex > len(data) - blocklen - 1) {
-		lastIndex--;
-		if (data[lastIndex] != 0) {
-			break;
+	lastIndex := len(data)
+	for lastIndex >= 0 && lastIndex > len(data)-blocklen-1 {
+		lastIndex--
+		if data[lastIndex] != 0 {
+			break
 		}
 	}
-	return data[:lastIndex + 1], nil
+	return data[:lastIndex+1], nil
 }

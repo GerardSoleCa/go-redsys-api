@@ -1,14 +1,13 @@
 package redsys
 
 import (
-	"encoding/base64"
 	"crypto/cipher"
 	"crypto/hmac"
-	"strings"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"net/url"
-	"fmt"
+	"strings"
 )
 
 var IV = []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
@@ -84,7 +83,7 @@ func (r *Redsys) createMerchantParameters(data *MerchantParametersRequest) strin
 	return base64.URLEncoding.EncodeToString(merchantMarshalledParams)
 }
 
-func (r *Redsys) decodeMerchantParameters(data string) (MerchantParametersResponse) {
+func (r *Redsys) decodeMerchantParameters(data string) MerchantParametersResponse {
 	merchantParameters := MerchantParametersResponse{}
 	decodedB64, _ := base64.URLEncoding.DecodeString(data)
 	unscaped, _ := url.QueryUnescape(string(decodedB64))
