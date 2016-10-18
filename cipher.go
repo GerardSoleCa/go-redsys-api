@@ -6,7 +6,46 @@ import (
 	"crypto/des"
 	"encoding/base64"
 	"log"
+	"crypto/hmac"
+	"crypto/sha256"
+	"strings"
 )
+
+
+var iv = []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
+
+func (r *Redsys) encrypt3DES(str string) string {
+
+	block := getCipher(r.Key)
+	cbc := cipher.NewCBCEncrypter(block, iv)
+
+	decrypted := []byte(str)
+	decryptedPadded, _ := zeroPad(decrypted, block.BlockSize())
+	cbc.CryptBlocks(decryptedPadded, decryptedPadded)
+
+	return base64.StdEncoding.EncodeToString(decryptedPadded)
+}
+
+func (r *Redsys) decrypt3DES(str string) string {
+
+	block := getCipher(r.Key)
+	cbc := cipher.NewCBCDecrypter(block, iv)
+
+	encrypted, _ := base64.StdEncoding.DecodeString(str)
+	cbc.CryptBlocks(encrypted, encrypted)
+
+	unpaddedResult, _ := zeroUnpad(encrypted, block.BlockSize())
+
+	return string(unpaddedResult)
+}
+
+func (r *Redsys) mac256(data string, key string) string {
+	decodedKey, _ := base64.StdEncoding.DecodeString(key)
+	hmac := hmac.New(sha256.New, []byte(decodedKey))
+	hmac.Write([]byte(strings.TrimSpace(data)))
+	result := hmac.Sum(nil)
+	return base64.StdEncoding.EncodeToString(result)
+}
 
 func getCipher(key string) cipher.Block {
 	secretKey, err := base64.StdEncoding.DecodeString(key)
