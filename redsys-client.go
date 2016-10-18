@@ -7,20 +7,18 @@ import (
 	"net/url"
 )
 
-
-// Redsys. Init this struct with your key to operate with the corresponding functions
+// Redsys Init this struct with your key to operate with the corresponding functions
 type Redsys struct {
 	Key string
 }
 
-
-// CreateMerchantParameters. Return a string corresponding to a marshalled MerchantParametersRequest
+// CreateMerchantParameters Return a string corresponding to a marshalled MerchantParametersRequest
 func (r *Redsys) CreateMerchantParameters(data *MerchantParametersRequest) string {
 	merchantMarshalledParams, _ := json.Marshal(data)
 	return base64.URLEncoding.EncodeToString(merchantMarshalledParams)
 }
 
-// DecodeMerchantParameters. Decode a response into a MerchantParametersResponse
+// DecodeMerchantParameters Decode a response into a MerchantParametersResponse
 func (r *Redsys) DecodeMerchantParameters(data string) MerchantParametersResponse {
 	merchantParameters := MerchantParametersResponse{}
 	decodedB64, _ := base64.URLEncoding.DecodeString(data)
@@ -33,9 +31,9 @@ func (r *Redsys) DecodeMerchantParameters(data string) MerchantParametersRespons
 func (r *Redsys) CreateMerchantSignature(data *MerchantParametersRequest) string {
 	stringMerchantParameters := r.CreateMerchantParameters(data)
 
-	orderId := data.MerchantOrder
+	orderID := data.MerchantOrder
 
-	encrypted := r.encrypt3DES(orderId)
+	encrypted := r.encrypt3DES(orderID)
 	return r.mac256(stringMerchantParameters, encrypted)
 }
 
@@ -43,8 +41,8 @@ func (r *Redsys) CreateMerchantSignature(data *MerchantParametersRequest) string
 func (r *Redsys) CreateMerchantSignatureNotif(data string) string {
 	merchantParametersResponse := r.DecodeMerchantParameters(data)
 
-	orderId := merchantParametersResponse.Order
-	encrypted := r.encrypt3DES(orderId)
+	orderID := merchantParametersResponse.Order
+	encrypted := r.encrypt3DES(orderID)
 	mac := r.mac256(data, encrypted)
 
 	decodedMac, _ := base64.StdEncoding.DecodeString(mac)

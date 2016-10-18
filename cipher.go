@@ -4,13 +4,12 @@ import (
 	"bytes"
 	"crypto/cipher"
 	"crypto/des"
-	"encoding/base64"
-	"log"
 	"crypto/hmac"
 	"crypto/sha256"
+	"encoding/base64"
+	"log"
 	"strings"
 )
-
 
 var iv = []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 

@@ -5,7 +5,7 @@ type MerchantParametersResponse struct {
 	Date              string `json:"Ds_Date"`
 	Hour              string `json:"Ds_Hour"`
 	SecurePayment     string `json:"Ds_SecurePayment"`
-	Card_Country      string `json:"Ds_Card_Country"`
+	CardCountry       string `json:"Ds_Card_Country"`
 	Amount            string `json:"Ds_Amount"`
 	Currency          string `json:"Ds_Currency"`
 	Order             string `json:"Ds_Order"`
