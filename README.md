@@ -18,4 +18,4 @@ Redsys api implementation with new the key-hashed message autentication code (HM
 
 ## License
 
-	[MIT](https://github.com/GerardSoleCa/go-redsys-api/blob/master/LICENSE)
+[MIT](https://github.com/GerardSoleCa/go-redsys-api/blob/master/LICENSE)
