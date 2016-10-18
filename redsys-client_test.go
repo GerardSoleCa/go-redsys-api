@@ -47,7 +47,7 @@ func TestMechantEncodingAndDecoding(t *testing.T) {
 		Date:              "09/11/2015",
 		Hour:              "18:03",
 		SecurePayment:     "0",
-		Card_Country:      "724",
+		CardCountry:       "724",
 		Amount:            "145",
 		Currency:          "978",
 		Order:             "0069",
