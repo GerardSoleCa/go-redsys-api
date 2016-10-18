@@ -2,21 +2,19 @@ package redsys
 
 import (
 	"encoding/base64"
-	"log"
-	"crypto/des"
 	"crypto/cipher"
-	"bytes"
 	"crypto/hmac"
 	"strings"
 	"crypto/sha256"
 	"encoding/json"
 	"net/url"
+	"fmt"
 )
 
 var IV = []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 
 type Redsys struct {
-
+	Key string
 }
 
 type MerchantParametersResponse struct {
@@ -37,7 +35,7 @@ type MerchantParametersResponse struct {
 }
 
 type MerchantParametersRequest struct {
-	MerchantAmount    	string `json:"DS_MERCHANT_AMOUNT"`
+	MerchantAmount          string `json:"DS_MERCHANT_AMOUNT"`
 	MerchantOrder           string `json:"DS_MERCHANT_ORDER"`
 	MerchantMerchantCode    string `json:"DS_MERCHANT_MERCHANTCODE"`
 	MerchantCurrency        string `json:"DS_MERCHANT_CURRENCY"`
@@ -48,9 +46,9 @@ type MerchantParametersRequest struct {
 	MerchantURLKO           string `json:"DS_MERCHANT_URLKO"`
 }
 
-func (r *Redsys) encrypt3DES(str string, key string) string {
+func (r *Redsys) encrypt3DES(str string) string {
 
-	block := getCipher(key)
+	block := getCipher(r.Key)
 	cbc := cipher.NewCBCEncrypter(block, IV)
 
 	decrypted := []byte(str)
@@ -60,9 +58,9 @@ func (r *Redsys) encrypt3DES(str string, key string) string {
 	return base64.StdEncoding.EncodeToString(decryptedPadded)
 }
 
-func (r *Redsys) decrypt3DES(str string, key string) string {
+func (r *Redsys) decrypt3DES(str string) string {
 
-	block := getCipher(key)
+	block := getCipher(r.Key)
 	cbc := cipher.NewCBCDecrypter(block, IV)
 
 	encrypted, _ := base64.StdEncoding.DecodeString(str)
@@ -94,36 +92,26 @@ func (r *Redsys) decodeMerchantParameters(data string) (MerchantParametersRespon
 	return merchantParameters
 }
 
-func getCipher(key string) cipher.Block {
-	secretKey, err := base64.StdEncoding.DecodeString(key)
+func (r *Redsys) createMerchantSignature(data *MerchantParametersRequest) string {
+	stringMerchantParameters := r.createMerchantParameters(data)
 
-	if err != nil {
-		log.Panic("Error decoding key", err)
-	}
+	orderId := data.MerchantOrder
 
-	crypto, err := des.NewTripleDESCipher(secretKey)
-	if err != nil {
-		log.Panic("Error generating cipher", err)
-	}
-	return crypto
+	encrypted := r.encrypt3DES(orderId)
+	return r.mac256(stringMerchantParameters, encrypted)
 }
 
-// zeroPad function to terminate blocksize in zeros
-func zeroPad(data []byte, blocklen int) ([]byte, error) {
-	padlen := (blocklen - (len(data) % blocklen)) % blocklen
-	pad := bytes.Repeat([]byte{0x00}, padlen)
+func (r *Redsys) createMerchantSignatureNotif(data string) string {
+	merchantParametersResponse := r.decodeMerchantParameters(data)
 
-	return append(data, pad...), nil
+	orderId := merchantParametersResponse.Order
+
+	encrypted := r.encrypt3DES(orderId)
+	mac := r.mac256(data, encrypted)
+
+	return base64.URLEncoding.EncodeToString([]byte(mac))
 }
 
-// zeroUnpad function to remove trailing zeros
-func zeroUnpad(data []byte, blocklen int) ([]byte, error) {
-	lastIndex := len(data);
-	for (lastIndex >= 0 && lastIndex > len(data) - blocklen - 1) {
-		lastIndex--;
-		if (data[lastIndex] != 0) {
-			break;
-		}
-	}
-	return data[:lastIndex + 1], nil
+func (r *Redsys) merchantSignatureIsValid(mac1 string, mac2 string) bool {
+	return hmac.Equal([]byte(mac1), []byte(mac2))
 }
