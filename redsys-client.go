@@ -104,11 +104,11 @@ func (r *Redsys) createMerchantSignatureNotif(data string) string {
 	merchantParametersResponse := r.decodeMerchantParameters(data)
 
 	orderId := merchantParametersResponse.Order
-
 	encrypted := r.encrypt3DES(orderId)
 	mac := r.mac256(data, encrypted)
 
-	return base64.URLEncoding.EncodeToString([]byte(mac))
+	decodedMac, _ := base64.StdEncoding.DecodeString(mac)
+	return base64.URLEncoding.EncodeToString(decodedMac)
 }
 
 func (r *Redsys) merchantSignatureIsValid(mac1 string, mac2 string) bool {
