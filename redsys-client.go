@@ -10,6 +10,7 @@ import (
 	"strings"
 	"crypto/sha256"
 	"encoding/json"
+	"net/url"
 )
 
 var IV = []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
@@ -18,21 +19,33 @@ type Redsys struct {
 
 }
 
-type MerchantParameters struct {
-	Ds_Date              string `json:"Ds_Date"`
-	Ds_Hour              string `json:"Ds_Hour"`
-	Ds_SecurePayment     string `json:"Ds_SecurePayment"`
-	Ds_Card_Country      string `json:"Ds_Card_Country"`
-	Ds_Amount            string `json:"Ds_Amount"`
-	Ds_Currency          string `json:"Ds_Currency"`
-	Ds_Order             string `json:"Ds_Order"`
-	Ds_MerchantCode      string `json:"Ds_MerchantCode"`
-	Ds_Terminal          string `json:"Ds_Terminal"`
-	Ds_Response          string `json:"Ds_Response"`
-	Ds_MerchantData      string `json:"Ds_MerchantData"`
-	Ds_TransactionType   string `json:"Ds_TransactionType"`
-	Ds_ConsumerLanguage  string `json:"Ds_ConsumerLanguage"`
-	Ds_AuthorisationCode string `json:"Ds_AuthorisationCode"`
+type MerchantParametersResponse struct {
+	Date              string `json:"Ds_Date"`
+	Hour              string `json:"Ds_Hour"`
+	SecurePayment     string `json:"Ds_SecurePayment"`
+	Card_Country      string `json:"Ds_Card_Country"`
+	Amount            string `json:"Ds_Amount"`
+	Currency          string `json:"Ds_Currency"`
+	Order             string `json:"Ds_Order"`
+	MerchantCode      string `json:"Ds_MerchantCode"`
+	Terminal          string `json:"Ds_Terminal"`
+	Response          string `json:"Ds_Response"`
+	MerchantData      string `json:"Ds_MerchantData"`
+	TransactionType   string `json:"Ds_TransactionType"`
+	ConsumerLanguage  string `json:"Ds_ConsumerLanguage"`
+	AuthorisationCode string `json:"Ds_AuthorisationCode"`
+}
+
+type MerchantParametersRequest struct {
+	MerchantAmount    	string `json:"DS_MERCHANT_AMOUNT"`
+	MerchantOrder           string `json:"DS_MERCHANT_ORDER"`
+	MerchantMerchantCode    string `json:"DS_MERCHANT_MERCHANTCODE"`
+	MerchantCurrency        string `json:"DS_MERCHANT_CURRENCY"`
+	MerchantTransactionType string `json:"DS_MERCHANT_TRANSACTIONTYPE"`
+	MerchantTerminal        string `json:"DS_MERCHANT_TERMINAL"`
+	MerchantMerchantUrl     string `json:"DS_MERCHANT_MERCHANTURL"`
+	MerchantURLOK           string `json:"DS_MERCHANT_URLOK"`
+	MerchantURLKO           string `json:"DS_MERCHANT_URLKO"`
 }
 
 func (r *Redsys) encrypt3DES(str string, key string) string {
@@ -68,9 +81,17 @@ func (r *Redsys) mac256(data string, key string) string {
 	return base64.StdEncoding.EncodeToString(result)
 }
 
-func (r *Redsys) createMerchantParameters(data *MerchantParameters) string {
+func (r *Redsys) createMerchantParameters(data *MerchantParametersRequest) string {
 	merchantMarshalledParams, _ := json.Marshal(data)
-	return base64.StdEncoding.EncodeToString(merchantMarshalledParams)
+	return base64.URLEncoding.EncodeToString(merchantMarshalledParams)
+}
+
+func (r *Redsys) decodeMerchantParameters(data string) (MerchantParametersResponse) {
+	merchantParameters := MerchantParametersResponse{}
+	decodedB64, _ := base64.URLEncoding.DecodeString(data)
+	unscaped, _ := url.QueryUnescape(string(decodedB64))
+	json.Unmarshal([]byte(unscaped), &merchantParameters)
+	return merchantParameters
 }
 
 func getCipher(key string) cipher.Block {

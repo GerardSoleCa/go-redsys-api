@@ -29,24 +29,39 @@ func TestSHA256Algorithm(t *testing.T) {
 
 func TestMechantEncodingAndDecoding(t *testing.T) {
 	const PARAMS = "eyJEU19NRVJDSEFOVF9BTU9VTlQiOiIxNDUiLCJEU19NRVJDSEFOVF9PUkRFUiI6IjEiLCJEU19NRVJDSEFOVF9NRVJDSEFOVENPREUiOiI5OTkwMDg4ODEiLCJEU19NRVJDSEFOVF9DVVJSRU5DWSI6Ijk3OCIsIkRTX01FUkNIQU5UX1RSQU5TQUNUSU9OVFlQRSI6IjAiLCJEU19NRVJDSEFOVF9URVJNSU5BTCI6Ijg3MSIsIkRTX01FUkNIQU5UX01FUkNIQU5UVVJMIjoiIiwiRFNfTUVSQ0hBTlRfVVJMT0siOiIiLCJEU19NRVJDSEFOVF9VUkxLTyI6IiJ9"
-	merchantParams := &MerchantParameters{
-		Ds_Date: "09/11/2015",
-		Ds_Hour: "18:03",
-		Ds_SecurePayment: "0",
-		Ds_Card_Country: "724",
-		Ds_Amount: "145",
-		Ds_Currency: "978",
-		Ds_Order: "0069",
-		Ds_MerchantCode: "999008881",
-		Ds_Terminal: "871",
-		Ds_Response: "0000",
-		Ds_MerchantData: "",
-		Ds_TransactionType: "0",
-		Ds_ConsumerLanguage: "1",
-		Ds_AuthorisationCode: "082150",
+	const DS_MERCHANT_PARAMETERS = "eyJEc19EYXRlIjoiMDklMkYxMSUyRjIwMTUiLCJEc19Ib3VyIjoiMTglM0EwMyIsIkRzX1NlY3VyZVBheW1lbnQiOiIwIiwiRHNfQ2FyZF9Db3VudHJ5IjoiNzI0IiwiRHNfQW1vdW50IjoiMTQ1IiwiRHNfQ3VycmVuY3kiOiI5NzgiLCJEc19PcmRlciI6IjAwNjkiLCJEc19NZXJjaGFudENvZGUiOiI5OTkwMDg4ODEiLCJEc19UZXJtaW5hbCI6Ijg3MSIsIkRzX1Jlc3BvbnNlIjoiMDAwMCIsIkRzX01lcmNoYW50RGF0YSI6IiIsIkRzX1RyYW5zYWN0aW9uVHlwZSI6IjAiLCJEc19Db25zdW1lckxhbmd1YWdlIjoiMSIsIkRzX0F1dGhvcmlzYXRpb25Db2RlIjoiMDgyMTUwIn0="
+
+	merchantParamsRequest := &MerchantParametersRequest{
+		MerchantAmount    :"145",
+		MerchantOrder          :"1",
+		MerchantMerchantCode   :"999008881",
+		MerchantCurrency       :"978",
+		MerchantTransactionType:"0",
+		MerchantTerminal       :"871",
+		MerchantMerchantUrl    :"",
+		MerchantURLOK          :"",
+		MerchantURLKO          :"",
+	}
+
+	merchantParams := MerchantParametersResponse{
+		Date: "09/11/2015",
+		Hour: "18:03",
+		SecurePayment: "0",
+		Card_Country: "724",
+		Amount: "145",
+		Currency: "978",
+		Order: "0069",
+		MerchantCode: "999008881",
+		Terminal: "871",
+		Response: "0000",
+		MerchantData: "",
+		TransactionType: "0",
+		ConsumerLanguage: "1",
+		AuthorisationCode: "082150",
 	}
 
 	redsys := Redsys{}
 
-	assert.Equal(t, redsys.createMerchantParameters(merchantParams), PARAMS, "Create Merchant Parameters " + PARAMS)
+	assert.Equal(t, redsys.createMerchantParameters(merchantParamsRequest), PARAMS, "Create Merchant Parameters " + PARAMS)
+	assert.Equal(t, redsys.decodeMerchantParameters(DS_MERCHANT_PARAMETERS), merchantParams, "Decode Merchant Parameters " + PARAMS)
 }
