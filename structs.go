@@ -20,13 +20,17 @@ type MerchantParametersResponse struct {
 
 // MerchantParametersRequest struct to construct Redsys API requests
 type MerchantParametersRequest struct {
-	MerchantAmount          string `json:"DS_MERCHANT_AMOUNT"`
-	MerchantOrder           string `json:"DS_MERCHANT_ORDER"`
-	MerchantMerchantCode    string `json:"DS_MERCHANT_MERCHANTCODE"`
-	MerchantCurrency        string `json:"DS_MERCHANT_CURRENCY"`
-	MerchantTransactionType string `json:"DS_MERCHANT_TRANSACTIONTYPE"`
-	MerchantTerminal        string `json:"DS_MERCHANT_TERMINAL"`
-	MerchantMerchantUrl     string `json:"DS_MERCHANT_MERCHANTURL"`
-	MerchantURLOK           string `json:"DS_MERCHANT_URLOK"`
-	MerchantURLKO           string `json:"DS_MERCHANT_URLKO"`
+	MerchantAmount             string `json:"DS_MERCHANT_AMOUNT"`
+	MerchantOrder              string `json:"DS_MERCHANT_ORDER"`
+	MerchantMerchantCode       string `json:"DS_MERCHANT_MERCHANTCODE"`
+	MerchantMerchantName       string `json:"DS_MERCHANT_MERCHANTNAME"`
+	MerchantCurrency           string `json:"DS_MERCHANT_CURRENCY"`
+	MerchantTransactionType    string `json:"DS_MERCHANT_TRANSACTIONTYPE"`
+	MerchantTerminal           string `json:"DS_MERCHANT_TERMINAL"`
+	MerchantMerchantUrl        string `json:"DS_MERCHANT_MERCHANTURL"`
+	MerchantURLOK              string `json:"DS_MERCHANT_URLOK"`
+	MerchantURLKO              string `json:"DS_MERCHANT_URLKO"`
+	MerchantConsumerLanguage   string `json:"Ds_Merchant_ConsumerLanguage"`
+	MerchantProductDescription string `json:"Ds_Merchant_ProductDescription"`
+	MerchantTitular            string `json:"Ds_Merchant_Titular"`
 }
