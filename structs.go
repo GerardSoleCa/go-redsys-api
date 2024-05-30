@@ -34,4 +34,5 @@ type MerchantParametersRequest struct {
 	MerchantUrlKO              string `json:"Ds_Merchant_UrlKO,omitempty"`
 	MerchantMerchantName       string `json:"Ds_Merchant_MerchantName,omitempty"`
 	MerchantConsumerLanguage   string `json:"Ds_Merchant_ConsumerLanguage,omitempty"`
+	MerchantPayMethods          string `json:"Ds_Merchant_Paymethods,omitempty"`
 }
