@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"strings"
 )
 
 // SignatureVersionSHA512 is the Ds_SignatureVersion value for the current
@@ -92,12 +93,20 @@ func (r *Redsys) TryDecodeMerchantParameters(data string) (MerchantParametersRes
 // never be used on the string that gets signed/verified - Redsys's own docs
 // are explicit that the signature covers the base64 parameter exactly as
 // transmitted, undecoded.
+//
+// Padding is optional too: HMAC_SHA512_V2 notifications arrive without the
+// trailing '=' (like the V2 signature itself), so a padded-only decode fails
+// whenever the length is not a multiple of 4 and the signature can then never
+// be verified. The trailing '=' are dropped and the raw (unpadded) encodings
+// used, which accept both forms.
 func decodeBase64Either(data string) ([]byte, error) {
-	if decoded, err := base64.URLEncoding.DecodeString(data); err == nil {
+	unpadded := strings.TrimRight(data, "=")
+
+	if decoded, err := base64.RawURLEncoding.DecodeString(unpadded); err == nil {
 		return decoded, nil
 	}
 
-	return base64.StdEncoding.DecodeString(data)
+	return base64.RawStdEncoding.DecodeString(unpadded)
 }
 
 // unescapeInPlace reverses Redsys's per-field percent-encoding (seen on fields

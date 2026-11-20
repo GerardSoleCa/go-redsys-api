@@ -335,3 +335,54 @@ func TestDecodeMerchantParameters_PayGoldPaidNotification(t *testing.T) {
 	assert.Equal(t, "1", result.ConsumerLanguage)
 	assert.Equal(t, "01903f9b923895767228066924f23b5892e88fdb", result.MerchantIdentifier)
 }
+
+// TestCreateMerchantSignatureNotif512_UnpaddedNotification covers HMAC_SHA512_V2
+// notifications, which Redsys sends with Ds_MerchantParameters in unpadded
+// base64 (like its own published example above). A padded-only decode cannot
+// read Ds_Order from them whenever the length is not a multiple of 4, so the
+// key could not be diversified and every such notification was rejected.
+func TestCreateMerchantSignatureNotif512_UnpaddedNotification(t *testing.T) {
+	const KEY = "sq7HjrUOBfKmC576ILgskD5srU870gJ7"
+	const ORDER = "261114a5ikq0"
+
+	payload := `{"Ds_Order":"` + ORDER + `","Ds_Response":"0000","Ds_Amount":"33000","Ds_Hour":"10%3A42"}`
+	data := base64.RawURLEncoding.EncodeToString([]byte(payload))
+
+	if len(data)%4 == 0 {
+		t.Fatal("fixture must need padding, or this test proves nothing")
+	}
+
+	_, paddedErr := base64.URLEncoding.DecodeString(data)
+	assert.Error(t, paddedErr, "fixture must be unparseable as padded base64url")
+
+	redsys := Redsys{Key: KEY}
+
+	decoded, err := redsys.TryDecodeMerchantParameters(data)
+	assert.NoError(t, err)
+	assert.Equal(t, ORDER, decoded.Order)
+	assert.Equal(t, "10:42", decoded.Hour)
+
+	diversifiedKey, err := diversifyKeyAES(KEY, ORDER)
+	assert.NoError(t, err)
+
+	signature, err := redsys.CreateMerchantSignatureNotif512(data)
+	assert.NoError(t, err)
+	assert.Equal(t, mac512(data, diversifiedKey), signature, "the signature covers the string as transmitted")
+}
+
+// TestDecodeMerchantParameters_AcceptsUnpaddedStandardBase64 covers the
+// standard alphabet without padding.
+func TestDecodeMerchantParameters_AcceptsUnpaddedStandardBase64(t *testing.T) {
+	const jsonPayload = `{"Ds_Order": "k9k>9d?ai", "Ds_Response": "0000", "Ds_Amount": "99999999999999999"}`
+	data := base64.RawStdEncoding.EncodeToString([]byte(jsonPayload))
+
+	if len(data)%4 == 0 || !strings.ContainsAny(data, "+/") {
+		t.Fatal("fixture must be unpadded standard base64")
+	}
+
+	redsys := Redsys{}
+	result, err := redsys.TryDecodeMerchantParameters(data)
+
+	assert.NoError(t, err)
+	assert.Equal(t, "k9k>9d?ai", result.Order)
+}
